@@ -10,6 +10,51 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+
+class Workout {
+    date = new Date();
+    id = (Date.now() + '').slice(-10);
+    constructor(coordinates, distance, duration) {
+        this.cords = coordinates; // [lat lng]
+        this.distance = distance; // km
+        this.duration = duration; // min
+    }
+
+    
+}
+
+class Running extends Workout {
+    constructor(coords, distance, duration, cadence){
+        super(coords, distance, duration);
+        this.cadence = cadence;
+        this.calcPace();
+    }
+
+    calcPace() {
+        // min / km
+        this.pace = this.duration / this.distance;
+        return this.pace;
+    }
+}
+
+
+class Cycling extends Workout {
+    constructor(coords, distance, duration, elvinGain) {
+        super(coords, distance, duration);
+        this.elvinGain = elvinGain;
+    }
+
+    calcSpeed() {
+        // km/h
+        this.speed = this.distance / (this.duration/60);
+        return this.speed;
+    }
+}
+
+const run1 = new Running([39,-12], 5.2, 20,178);
+const cycle1 = new Cycling([39,-12], 27, 95,523);
+
+//APP 
 class App {
     #map;
     #mapEvent;
