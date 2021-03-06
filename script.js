@@ -14,6 +14,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class Workout {
     date = new Date();
     id = (Date.now() + '').slice(-10);
+    clicks = 0;
     constructor(coordinates, distance, duration) {
         this.cords = coordinates; // [lat lng]
         this.distance = distance; // km
@@ -26,8 +27,11 @@ class Workout {
         ,'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
         this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on 
-        ${months[this.date.getMonth()]} ${this.date.getDate()}`;
-        
+        ${months[this.date.getMonth()]} ${this.date.getDate()}`;        
+    }
+
+    click() {
+        this.clicks++;
     }
 }
 
@@ -71,11 +75,13 @@ const cycle1 = new Cycling([39,-12], 27, 95,523);
 class App {
     #map;
     #mapEvent;
+    #mapZoomLevel = 13;
     #workouts = []
     constructor() {
         this._getPosition();
         form.addEventListener('submit', this._newWorkOut.bind(this));
         inputType.addEventListener('change', this._toggleElevationField)
+        containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     }
 
     _getPosition() {
@@ -90,16 +96,11 @@ class App {
 
         const coords = [latitude, longitude];
         
-        this.#map = L.map('map').setView(coords, 13);
+        this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(this.#map);
-
-        L.marker(coords)
-        .addTo(this.#map)
-        .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-        .openPopup();
 
         // handeling click on map 
         this.#map.on('click', this._showForm.bind(this));
@@ -236,6 +237,22 @@ class App {
         }  
 
         form.insertAdjacentHTML('afterend', html);
+    }
+
+    _moveToPopup(event) {
+        let workoutEl = event.target.closest('.workout');
+        if(!workoutEl) return;
+
+        const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
+
+        this.#map.setView(workout.cords, this.#mapZoomLevel, {
+            animate: true,
+            pan: {
+                duration: 1
+            }
+        });
+
+        workout.click();
     }
 }
 
